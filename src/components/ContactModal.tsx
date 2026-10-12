@@ -56,7 +56,7 @@ export default function ContactModal({ open, onClose }: ContactModalProps) {
         <div className="contact-options-list">
           {/* WhatsApp Option */}
           <a
-            href="https://wa.me/919487255660?text=Hello%20Silvassa,%20I%20would%20like%20to%20enquire%20about%20your%20cakes%20and%20pastries."
+            href="https://wa.me/919487255660?text=Hello%20Silvassa!%20Let's%20make%20a%20sweet%20deal%20today!%20🍰🤝."
             target="_blank"
             rel="noopener noreferrer"
             className="contact-opt-row opt-whatsapp"
