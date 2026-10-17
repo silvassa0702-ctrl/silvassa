@@ -1,6 +1,7 @@
 import { useEffect, useState, type MouseEvent } from 'react';
 import Icon from './Icon';
-import { MENU, SIZES } from '../data/menu';
+import { SIZES } from '../data/menu';
+import { productService } from '../services/productService';
 import type { Cart } from '../types';
 import { assetUrl } from '../utils/assets';
 import { getCartTotalPrice, getUnitPrice } from '../utils/pricing';
@@ -13,7 +14,7 @@ interface CartSidebarProps {
   onDecrease: (key: string) => void;
   onRemove: (key: string) => void;
   onEdit: (key: string) => void;
-  onConfirm: () => void;
+  onConfirm: (details: { customerName: string; customerPhone: string; location: string }) => void;
   onToast: (message: string) => void;
 }
 
@@ -67,11 +68,27 @@ export default function CartSidebar({
   };
 
   const handleConfirm = () => {
+    if (!name.trim()) {
+      alert('Please enter your name.');
+      return;
+    }
     if (!phone.trim()) {
       alert('Please enter your phone number.');
       return;
     }
-    onConfirm();
+    if (!/^\+?[0-9]{10,13}$/.test(phone.replace(/\s+/g, ''))) {
+      alert('Please enter a valid 10–13 digit phone number.');
+      return;
+    }
+    if (!location.trim()) {
+      alert('Please enter your location.');
+      return;
+    }
+    onConfirm({
+      customerName: name.trim(),
+      customerPhone: phone.replace(/\s+/g, ''),
+      location: location.trim(),
+    });
   };
 
   const handleUseCurrentLocation = () => {
@@ -129,7 +146,7 @@ export default function CartSidebar({
           ) : (
             keys.map((key) => {
               const entry = cart[key];
-              const item = MENU.find((m) => m.id === entry.id);
+              const item = productService.getMenuItems().find((m) => String(m.id) === String(entry.id));
               if (!item) return null;
               const sizeObj = SIZES.find((s) => s.id === entry.size) ?? SIZES[0];
               const unitPrice = getUnitPrice(item.price, entry.size);
@@ -234,7 +251,7 @@ export default function CartSidebar({
                 </div>
 
                 <button className="confirm-btn" onClick={handleConfirm}>
-                  Confirm Enquiry
+                  Confirm Order &amp; Send Details
                 </button>
                 <p
                   style={{
@@ -245,7 +262,7 @@ export default function CartSidebar({
                     fontWeight: 500,
                   }}
                 >
-                  Silvassa executive will contact you shortly
+                  Silvassa executive will contact you shortly to confirm delivery
                 </p>
               </div>
             )}

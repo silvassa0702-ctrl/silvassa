@@ -1,5 +1,6 @@
-import { MENU, SIZES } from '../data/menu';
-import type { Cart, Category, SizeId } from '../types';
+import { SIZES } from '../data/menu';
+import { productService } from '../services/productService';
+import type { Cart, Category, MenuItem, SizeId } from '../types';
 
 export function getSizeDesc(cat: Category, sizeId: SizeId): string {
   if (cat === 'brownie') {
@@ -19,9 +20,9 @@ export function getUnitPrice(basePrice: number, sizeId: SizeId): number {
   return Math.round((basePrice * size.factor) / 10) * 10;
 }
 
-export function getItemTotalQty(cart: Cart, itemId: number): number {
+export function getItemTotalQty(cart: Cart, itemId: number | string): number {
   return Object.values(cart)
-    .filter((c) => c.id === itemId)
+    .filter((c) => String(c.id) === String(itemId))
     .reduce((sum, c) => sum + c.qty, 0);
 }
 
@@ -29,9 +30,10 @@ export function getCartTotalPieces(cart: Cart): number {
   return Object.values(cart).reduce((sum, c) => sum + c.qty, 0);
 }
 
-export function getCartTotalPrice(cart: Cart): number {
+export function getCartTotalPrice(cart: Cart, menuItems?: MenuItem[]): number {
+  const pool = menuItems && menuItems.length > 0 ? menuItems : productService.getMenuItems();
   return Object.values(cart).reduce((sum, c) => {
-    const item = MENU.find((m) => m.id === c.id);
+    const item = pool.find((m) => String(m.id) === String(c.id));
     return item ? sum + getUnitPrice(item.price, c.size) * c.qty : sum;
   }, 0);
 }

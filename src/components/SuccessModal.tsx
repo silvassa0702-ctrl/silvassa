@@ -70,7 +70,7 @@ export default function SuccessModal({ open, onClose }: SuccessModalProps) {
 
         {/* Success Message Header */}
         <h1 className="success-screen-title">
-          Your Enquiry Has Been Received!
+          Your Order Has Been Received!
         </h1>
 
         {/* Success Message Description */}

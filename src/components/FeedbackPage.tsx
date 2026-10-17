@@ -1,5 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Icon from './Icon';
+import { feedbackService } from '../services/feedbackService';
+import { productService } from '../services/productService';
+import type { MenuItem } from '../types';
 
 interface FeedbackPageProps {
   onBack: () => void;
@@ -8,13 +11,25 @@ interface FeedbackPageProps {
 
 export default function FeedbackPage({ onBack, onSubmitSuccess }: FeedbackPageProps) {
   const [name, setName] = useState('');
+  const [dbProducts, setDbProducts] = useState<MenuItem[]>([]);
+  const [selectedProduct, setSelectedProduct] = useState('');
   const [rating, setRating] = useState<number>(5);
   const [hoverRating, setHoverRating] = useState<number>(0);
   const [feedback, setFeedback] = useState('');
+  const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  useEffect(() => {
+    void productService.listPublic().then((items) => {
+      setDbProducts(items);
+      if (items.length > 0 && !selectedProduct) {
+        setSelectedProduct(items[0].name);
+      }
+    });
+  }, []);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) {
       setError('Please enter your name.');
@@ -26,23 +41,23 @@ export default function FeedbackPage({ onBack, onSubmitSuccess }: FeedbackPagePr
     }
 
     setError('');
-    // Store in localStorage so feedbacks persist locally
-    try {
-      const savedFeedbacks = JSON.parse(localStorage.getItem('silvassa_feedbacks') || '[]');
-      savedFeedbacks.push({
-        id: Date.now(),
-        name: name.trim(),
-        rating,
-        feedback: feedback.trim(),
-        date: new Date().toISOString(),
-      });
-      localStorage.setItem('silvassa_feedbacks', JSON.stringify(savedFeedbacks));
-    } catch {
-      // ignore storage error
-    }
+    setSubmitting(true);
 
-    setSubmitted(true);
-    if (onSubmitSuccess) onSubmitSuccess();
+    try {
+      // Connect to backend PostgreSQL database
+      await feedbackService.submit({
+        customer_name: name.trim(),
+        product_name: selectedProduct,
+        rating,
+        message: feedback.trim(),
+      });
+      setSubmitted(true);
+      if (onSubmitSuccess) onSubmitSuccess();
+    } catch {
+      setError('Failed to submit feedback. Please check your internet connection.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const getRatingLabel = (stars: number) => {
@@ -96,7 +111,7 @@ export default function FeedbackPage({ onBack, onSubmitSuccess }: FeedbackPagePr
             </div>
             <h2 className="feedback-success-title">Thank You, {name}!</h2>
             <p className="feedback-success-desc">
-              Your feedback and {rating}-star rating mean the world to our baking team. We review every note to make your next treat even better.
+              Your review for <strong>{selectedProduct}</strong> and {rating}-star rating have been safely stored in our database. We review every note to make your next treat even better.
             </p>
             <div className="feedback-success-actions">
               <button
@@ -193,16 +208,37 @@ export default function FeedbackPage({ onBack, onSubmitSuccess }: FeedbackPagePr
                 />
               </div>
 
+              {/* Product Added / Ordered Field */}
+              <div className="feedback-form-group">
+                <label htmlFor="feedback-product" className="feedback-label">
+                  Which Product / Treat Did You Try? <span className="req-star">*</span>
+                </label>
+                <select
+                  id="feedback-product"
+                  className="feedback-input"
+                  value={selectedProduct}
+                  onChange={(e) => setSelectedProduct(e.target.value)}
+                  style={{ background: '#fff', cursor: 'pointer' }}
+                >
+                  {dbProducts.map((item) => (
+                    <option key={item.id} value={item.name}>
+                      {item.name} ({item.cat.toUpperCase()})
+                    </option>
+                  ))}
+                  <option value="General Bakery Experience">General Bakery &amp; Delivery Experience</option>
+                </select>
+              </div>
+
               {/* Feedback Message */}
               <div className="feedback-form-group">
                 <label htmlFor="feedback-text" className="feedback-label">
-                  Your Thoughts & Feedback <span className="req-star">*</span>
+                  Your Thoughts &amp; Feedback <span className="req-star">*</span>
                 </label>
                 <textarea
                   id="feedback-text"
                   rows={4}
                   className="feedback-textarea"
-                  placeholder="What did you order? How was the taste, packaging, and delivery? Any suggestions?"
+                  placeholder="What did you think of the flavor, texture, packaging, or delivery? Any suggestions?"
                   value={feedback}
                   onChange={(e) => {
                     setFeedback(e.target.value);
@@ -214,8 +250,8 @@ export default function FeedbackPage({ onBack, onSubmitSuccess }: FeedbackPagePr
 
               {/* Submit Button */}
               <div className="feedback-form-actions">
-                <button type="submit" className="feedback-submit-btn">
-                  <span>Send Feedback</span>
+                <button type="submit" className="feedback-submit-btn" disabled={submitting}>
+                  <span>{submitting ? 'Saving to Database...' : 'Send Feedback'}</span>
                   <Icon name="arrow-right" />
                 </button>
               </div>

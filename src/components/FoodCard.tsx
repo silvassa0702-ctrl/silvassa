@@ -8,11 +8,17 @@ interface FoodCardProps {
   item: MenuItem;
   index: number;
   qtyInCart: number;
-  onOpenDetails: (id: number) => void;
-  onOpenCustomize: (id: number) => void;
+  onOpenDetails: (id: number | string) => void;
+  onOpenCustomize: (id: number | string) => void;
 }
 
-export default function FoodCard({ item, index, qtyInCart, onOpenDetails, onOpenCustomize }: FoodCardProps) {
+export default function FoodCard({
+  item,
+  index,
+  qtyInCart,
+  onOpenDetails,
+  onOpenCustomize,
+}: FoodCardProps) {
   const [liked, setLiked] = useState(false);
   void liked;
   const delay = (index * 0.05).toFixed(2);

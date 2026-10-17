@@ -7,7 +7,7 @@ interface DetailsModalProps {
   open: boolean;
   item: MenuItem | null;
   onClose: () => void;
-  onSelectSize: (id: number) => void;
+  onSelectSize: (id: number | string) => void;
 }
 
 const DEFAULT_INGREDIENTS =

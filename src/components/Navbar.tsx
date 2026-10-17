@@ -7,6 +7,7 @@ interface NavbarProps {
   currentPage?: 'home' | 'story' | 'feedback';
   onNavigate?: (page: 'home' | 'story' | 'feedback') => void;
   onOpenContact?: () => void;
+  onOpenMenu?: () => void;
 }
 
 export default function Navbar({
@@ -15,6 +16,7 @@ export default function Navbar({
   currentPage = 'home',
   onNavigate,
   onOpenContact,
+  onOpenMenu,
 }: NavbarProps) {
   const [scrolled, setScrolled] = useState(false);
 
@@ -72,12 +74,15 @@ export default function Navbar({
               href="#foodSection"
               className="nav-text-link"
               onClick={(e) => {
-                if (currentPage !== 'home') {
+                if (currentPage !== 'home' || onOpenMenu) {
                   e.preventDefault();
-                  if (onNavigate) onNavigate('home');
-                  setTimeout(() => {
-                    document.getElementById('foodSection')?.scrollIntoView({ behavior: 'smooth' });
-                  }, 100);
+                  if (onOpenMenu) onOpenMenu();
+                  else if (onNavigate) {
+                    onNavigate('home');
+                    setTimeout(() => {
+                      document.getElementById('foodSection')?.scrollIntoView({ behavior: 'smooth' });
+                    }, 100);
+                  }
                 }
               }}
             >

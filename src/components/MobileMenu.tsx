@@ -7,6 +7,7 @@ interface MobileMenuProps {
   currentPage?: 'home' | 'story' | 'feedback';
   onNavigate?: (page: 'home' | 'story' | 'feedback') => void;
   onOpenContact?: () => void;
+  onOpenMenu?: () => void;
 }
 
 export default function MobileMenu({
@@ -15,6 +16,7 @@ export default function MobileMenu({
   currentPage = 'home',
   onNavigate,
   onOpenContact,
+  onOpenMenu,
 }: MobileMenuProps) {
   const handleNavigate = (page: 'home' | 'story' | 'feedback') => {
     if (onNavigate) onNavigate(page);
@@ -58,12 +60,15 @@ export default function MobileMenu({
             className="mobile-menu-link"
             onClick={(e) => {
               onClose();
-              if (currentPage !== 'home') {
+              if (currentPage !== 'home' || onOpenMenu) {
                 e.preventDefault();
-                if (onNavigate) onNavigate('home');
-                setTimeout(() => {
-                  document.getElementById('foodSection')?.scrollIntoView({ behavior: 'smooth' });
-                }, 100);
+                if (onOpenMenu) onOpenMenu();
+                else if (onNavigate) {
+                  onNavigate('home');
+                  setTimeout(() => {
+                    document.getElementById('foodSection')?.scrollIntoView({ behavior: 'smooth' });
+                  }, 100);
+                }
               }
             }}
           >

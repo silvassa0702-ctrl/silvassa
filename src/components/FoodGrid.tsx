@@ -6,8 +6,8 @@ import { getItemTotalQty } from '../utils/pricing';
 interface FoodGridProps {
   items: MenuItem[];
   cart: Cart;
-  onOpenDetails: (id: number) => void;
-  onOpenCustomize: (id: number) => void;
+  onOpenDetails: (id: number | string) => void;
+  onOpenCustomize: (id: number | string) => void;
 }
 
 export default function FoodGrid({ items, cart, onOpenDetails, onOpenCustomize }: FoodGridProps) {
