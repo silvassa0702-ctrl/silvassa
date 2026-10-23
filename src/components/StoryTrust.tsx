@@ -176,13 +176,13 @@ export default function StoryTrust({ onOpenStory, onOpenFeedback }: StoryTrustPr
                 <span>+91 9361840921</span>
               </a>
               <a
-                href="https://wa.me/919487255660"
+                href="https://wa.me/917810045660"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="trust-contact-link"
               >
                 <Icon name="whatsapp" />
-                <span>+91 9487255660</span>
+                <span>+91 7810045660</span>
               </a>
               <a href="mailto:silvassa0702@gmail.com" className="trust-contact-link">
                 <Icon name="envelope-fill" />
