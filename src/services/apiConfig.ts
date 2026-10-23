@@ -1,10 +1,12 @@
 /**
  * Central API configuration for connecting frontend to FastAPI backend.
  */
+const rawUrl = (import.meta.env.VITE_API_BASE_URL as string | undefined)?.trim() || 'https://silvassa-backend.onrender.com/api';
+const cleanUrl = rawUrl.replace(/\/+$/, '');
+const normalizedBaseUrl = cleanUrl.endsWith('/api') ? cleanUrl : `${cleanUrl}/api`;
+
 export const apiConfig = {
-  baseUrl:
-    (import.meta.env.VITE_API_BASE_URL as string | undefined)?.replace(/\/$/, '') ||
-    'http://localhost:8000/api',
+  baseUrl: normalizedBaseUrl,
 } as const;
 
 export function isBackendConfigured(): boolean {
