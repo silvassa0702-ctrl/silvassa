@@ -6,30 +6,6 @@ import { requestJson } from './apiConfig';
 const STORAGE_KEY = 'silvassa_confirmed_enquiries';
 const SEQ_KEY = 'silvassa_enquiry_seq';
 
-const seed: Enquiry[] = [
-  {
-    id: 'ENQ-1001',
-    customerName: 'Priya Sharma',
-    customerPhone: '9876543210',
-    location: 'Silvassa, Dadra & Nagar Haveli',
-    items: [
-      {
-        productId: 1,
-        productName: 'Roasted Nut Fudge Brownie',
-        size: 'full',
-        sizeName: '1 Kg',
-        qty: 2,
-        unitPrice: 640,
-        lineTotal: 1280,
-      },
-    ],
-    total: 1280,
-    confirmationStatus: 'pending',
-    submittedAt: '2026-10-12T09:30:00.000Z',
-    updatedAt: '2026-10-12T09:30:00.000Z',
-  },
-];
-
 const listeners = new Set<() => void>();
 
 function emit(): void {
@@ -49,15 +25,13 @@ function writeSeq(n: number): void {
 function loadEnquiries(): Enquiry[] {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(seed));
-      return [...seed];
-    }
+    if (!raw) return [];
     const parsed = JSON.parse(raw) as Enquiry[];
-    if (!Array.isArray(parsed)) return [...seed];
-    return parsed;
+    if (!Array.isArray(parsed)) return [];
+    // Filter out any legacy dummy seed enquiries
+    return parsed.filter((e) => e.id !== 'ENQ-1001');
   } catch {
-    return [...seed];
+    return [];
   }
 }
 
@@ -194,14 +168,12 @@ export const enquiryService = {
           };
         });
 
-        if (mapped.length > 0) {
-          enquiries = mapped;
-          persist();
-          return mapped;
-        }
+        enquiries = mapped;
+        persist();
+        return mapped;
       }
     } catch {
-      // Offline or unauthenticated fallback to local state
+      // Unauthenticated or offline: keep current local state
     }
     return enquiries;
   },
